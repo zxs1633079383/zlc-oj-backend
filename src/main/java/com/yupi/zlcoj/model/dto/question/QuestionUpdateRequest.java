@@ -47,12 +47,13 @@ public class QuestionUpdateRequest implements Serializable {
     /**
      * 判题用例(json 数据)
      */
-    private String judeCase;
+    private List<JudeCase> judeCase;
+//    private String judeCase;
 
     /**
      * 判题配置(json 对象)
      */
-    private String judeConfig;
+    private JudeConfig judeConfig;
 
     private static final long serialVersionUID = 1L;
 }

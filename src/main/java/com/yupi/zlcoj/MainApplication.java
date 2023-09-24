@@ -9,11 +9,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * 主类（项目启动入口）
- *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 // todo 如需开启 Redis，须移除 exclude 中的内容
+// todo 实现c++/c的代码沙箱(第五集作业)
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class})
 @MapperScan("com.yupi.zlcoj.mapper")
 @EnableScheduling

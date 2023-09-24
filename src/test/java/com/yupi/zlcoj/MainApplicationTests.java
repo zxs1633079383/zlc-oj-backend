@@ -1,9 +1,15 @@
 package com.yupi.zlcoj;
 
 import com.yupi.zlcoj.config.WxOpenConfig;
+
 import javax.annotation.Resource;
+
+import com.yupi.zlcoj.model.entity.QuestionSubmit;
+import com.yupi.zlcoj.service.QuestionSubmitService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Date;
 
 /**
  * 主类测试
@@ -17,9 +23,34 @@ class MainApplicationTests {
     @Resource
     private WxOpenConfig wxOpenConfig;
 
+    @Resource
+    private QuestionSubmitService questionSubmitService;
+
     @Test
     void contextLoads() {
         System.out.println(wxOpenConfig);
+    }
+
+    @Test
+    void inserTCode() {
+        QuestionSubmit questionSubmit = new QuestionSubmit();
+        questionSubmit.setId(2L);
+        questionSubmit.setLanguage("java");
+        questionSubmit.setCode("public class Main {\n" +
+                "    public static void main(String[] args) {\n" +
+                "        int a = Integer.parseInt(args[0]);\n" +
+                "        int b = Integer.parseInt(args[1]);\n" +
+                "        System.out.println((a + b));\n" +
+                "\n" +
+                "    }\n" +
+                "}");
+        questionSubmit.setJudeInfo("{}");
+        questionSubmit.setStatus(0);
+        questionSubmit.setQuestionId(2L);
+        questionSubmit.setUserId(2L);
+
+        boolean save = questionSubmitService.save(questionSubmit);
+        System.out.println("删除是否成功: " + save);
     }
 
 }

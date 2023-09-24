@@ -8,7 +8,11 @@ package com.yupi.zlcoj.constant;
  */
 public enum QuestionSubmitConstant {
 
-    WAITNG("等待中",0),
-    RUNING("管理员","admin")
-    BAN("被封号","ban"),
+//    WAITNG("等待中",0),
+//    RUNING("管理员","admin"),
+//    BAN("被封号","ban");
+//
+//    QuestionSubmitConstant(String user, String admin) {
+//        this
+//    }
 }

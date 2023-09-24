@@ -14,19 +14,18 @@ import java.util.stream.Collectors;
  */
 public enum JudeInfoMessageEnum {
 
-    ACCEPTED("成功","Accepted"),
-    ANSWER_ERRPR("答案错误","Answer"),
-    COMPILE_ERROR("Compile Error","编译错误"),
-    MEMORY_LIMIT_EXCEEDED("","内存溢出"),
-    TIME_LIMIT_EXCEEDED("超市错误","Time Limit Exceeded"),
-    Presentation_Error("Presentation_Error","展示错误"),
-    WAITING("waiting","等待中"),
-    OUTPUT_LIMIT_EXCEEDED("OUTPUT_LIMIT_EXCEEDED","输出溢出"),
-    DANGEROUS_OPERATION("Dangerouss Operation","危险操作"),
-    RUNTIME_ERROE("Runtime_error","运行错误"),
-    SYSTEM_ERROR("SYSTEM_ERROR","系统错误");
-
-
+    ACCEPTED("成功", "Accepted"),
+    ANSWER_ERRPR("答案错误", "Answer"),
+    COMPILE_ERROR("Compile Error", "编译错误"),
+    MEMORY_LIMIT_EXCEEDED("", "内存溢出"),
+    TIME_LIMIT_EXCEEDED("超時错误", "Time Limit Exceeded"),
+    Presentation_Error("Presentation_Error", "展示错误"),
+    WAITING("waiting", "等待中"),
+    OUTPUT_LIMIT_EXCEEDED("OUTPUT_LIMIT_EXCEEDED", "输出溢出"),
+    DANGEROUS_OPERATION("Dangerouss Operation", "危险操作"),
+    RUNTIME_ERROE("Runtime_error", "运行错误"),
+    SYSTEM_ERROR("SYSTEM_ERROR", "系统错误"),
+    WRONG_ANSWER("WRONG_ANSWER", "答案错误");
 
 
     private final String text;

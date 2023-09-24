@@ -50,10 +50,7 @@ public class QuestionAddRequest implements Serializable {
      */
     private JudeConfig judeConfig;
 
-    /**
-     * 创建用户 id
-     */
-    private Long userId;
+
 
 
 }

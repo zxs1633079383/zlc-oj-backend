@@ -139,7 +139,8 @@ public class QuestionVO implements Serializable {
         questionVO.setTags(GSON.fromJson(question.getTags(), new TypeToken<List<String>>() {
         }.getType()));
         String judeConfig1 = question.getJudeConfig();
-        questionVO.setJudeConfig(GSON.fromJson(question.getJudeConfig(),new TypeToken<List<JudeConfig>>(){}.getType()));;
+        questionVO.setJudeConfig(GSON.fromJson(question.getJudeConfig(),new TypeToken<JudeConfig>(){}.getType()));;
+        int i = 1;
 
         return questionVO;
     }

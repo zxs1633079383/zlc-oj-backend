@@ -10,5 +10,5 @@ public class JudeCase {
 
     private String input;
 
-    private String outout;
+    private String output;
 }
