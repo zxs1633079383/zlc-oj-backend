@@ -1,5 +1,6 @@
 package com.yupi.zlcoj.controller;
 
+import cn.hutool.core.lang.hash.Hash;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.yupi.zlcoj.annotation.AuthCheck;
@@ -24,12 +25,14 @@ import com.yupi.zlcoj.model.vo.QuestionVO;
 import com.yupi.zlcoj.service.QuestionService;
 import com.yupi.zlcoj.service.QuestionSubmitService;
 import com.yupi.zlcoj.service.UserService;
+import com.yupi.zlcoj.utils.RedisUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -51,6 +54,10 @@ public class QuestionController {
 
     @Resource
     private QuestionSubmitService questionSubmitService;
+
+    @Resource
+    private RedisUtils redisUtils;
+
     private final static Gson GSON = new Gson();
 
 
@@ -328,6 +335,15 @@ public class QuestionController {
         Page<QuestionSubmit> page = questionSubmitService.page(new Page<>(current, pageSize), questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(page, user));
 
+    }
+
+
+    @GetMapping("/question_submit/redis/getById")
+    public BaseResponse<HashMap<String, Object>> QuestionSubmitStateToRedisGetById(long questionSubmitId) {
+//    public BaseResponse<Integer> QuestionSubmitStateToRedisGetById(long questionSubmitId) {
+        HashMap<String, Object> map = (HashMap<String, Object>) redisUtils.get("submit:" + questionSubmitId);
+//        Integer result = (Integer) redisUtils.get("submit:" + questionSubmitId);
+        return ResultUtils.success(map);
     }
 
 

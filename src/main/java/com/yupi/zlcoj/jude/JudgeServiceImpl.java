@@ -1,6 +1,7 @@
 package com.yupi.zlcoj.jude;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,12 +21,15 @@ import com.yupi.zlcoj.model.entity.QuestionSubmit;
 import com.yupi.zlcoj.model.enums.QuestionSubmitStatusEnum;
 import com.yupi.zlcoj.service.QuestionService;
 import com.yupi.zlcoj.service.QuestionSubmitService;
+import com.yupi.zlcoj.utils.RedisUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 @Service
+@Slf4j
 public class JudgeServiceImpl implements JudgeService {
 
 
@@ -40,6 +44,9 @@ public class JudgeServiceImpl implements JudgeService {
 
     @Resource
     private JudeManager judeManager;
+
+    @Resource
+    private RedisUtils redisUtils;
 
     @Override
     public QuestionSubmit duJudge(long questionSubmitId) {
@@ -70,6 +77,14 @@ public class JudgeServiceImpl implements JudgeService {
         boolean update = questionSubmitService.updateById(questionSubmitUpdate);
         if (!update) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新错误");
+        } else {
+            //存入redis 更新判题中 (2)
+            HashMap<String, Object> map = (HashMap<String, Object>) redisUtils.get("submit:" + questionSubmitId);
+            map.put("questionSubmitId", questionSubmitUpdate.getId());
+            map.put("judgeInfo", questionSubmitUpdate.getJudeInfo());
+            map.put("status", questionSubmitUpdate.getStatus());
+            redisUtils.set("submit:" + questionSubmitUpdate.getId(), map);
+//            redisUtils.set("submit:" + questionSubmitUpdate.getId(), questionSubmitUpdate.getStatus());
         }
 
         Long id = questionSubmit.getId();
@@ -95,13 +110,42 @@ public class JudgeServiceImpl implements JudgeService {
                 .inputList(inputList)
                 .build();
         ExecuteCodeResponse executeCodeResponse = codeSandbox.executeCode(executeCodeRequest);
-        List<String> outputList = executeCodeResponse.getOutputList();
 
         //4. 根据沙箱的执行结果. 设置题目的判题状态和信息
         //封装上下文
         JudeContext judeContext = new JudeContext();
+        // 兜底方法, 解决前端编译错误, 前端无线调用
+        if (executeCodeResponse.getStatus() == null) {
+            JudeInfo judeInfo1 = new JudeInfo();
+            judeInfo1.setMessage("编译错误, 请检查代码");
+            judeInfo1.setMemory(0L);
+            judeInfo1.setTime(0L);
+            //直接更新状态为2.,judgeinfo 为 该内容  然后抛异常终止吧
+            judeContext.setJudeInfo(judeInfo1);
+            QuestionSubmit questionSubmitError = new QuestionSubmit();
+            questionSubmitError.setId(questionSubmitId);
+            questionSubmitError.setJudeInfo(JSONUtil.toJsonStr(judeInfo1));
+            questionSubmitError.setStatus(2);
+            boolean flag = questionSubmitService.updateById(questionSubmitError);
+            //存入redis 结果 (成功 或者 失败) (3)
+            HashMap<String, Object> map = (HashMap<String, Object>) redisUtils.get("submit:" + 1706561617770061825L);
+            map.put("questionSubmitId", questionSubmitId);
+            map.put("judgeInfo", questionSubmitError.getJudeInfo());
+            map.put("status", questionSubmitError.getStatus());
+            redisUtils.set("submit:" + questionSubmitError.getId(), map);
+
+            //执行到这里报错???
+            QuestionSubmit submitError = questionSubmitService.getById(questionSubmitId);
+            log.info("是否执行到这里报错??");
+
+            return submitError;
+        } else {
+            judeContext.setJudeInfo(executeCodeResponse.getJudeInfo());
+        }
+        List<String> outputList = executeCodeResponse.getOutputList();
+
+
         // judeinfo是沙箱那边提供的
-        judeContext.setJudeInfo(executeCodeResponse.getJudeInfo());
         judeContext.setInputList(inputList);
         judeContext.setOutputList(outputList);
         judeContext.setJudeCaseList(judeCaseList);
@@ -120,6 +164,14 @@ public class JudgeServiceImpl implements JudgeService {
         boolean update2 = questionSubmitService.updateById(questionSubmitResult);
         if (!update2) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新失败");
+        } else {
+            //存入redis 结果 (成功 或者 失败) (3)
+            HashMap<String, Object> map = (HashMap<String, Object>) redisUtils.get("submit:" + 1706561617770061825L);
+            map.put("questionSubmitId", questionSubmitId);
+            map.put("judgeInfo", questionSubmitResult.getJudeInfo());
+            map.put("status", questionSubmitResult.getStatus());
+            redisUtils.set("submit:" + questionSubmitResult.getId(), map);
+//            redisUtils.set("submit:" + questionSubmitResult.getId(), questionSubmitResult.getStatus());
         }
 
         QuestionSubmit questionSubmitResultFinal = questionSubmitService.getById(questionSubmitId);

@@ -12,7 +12,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 // todo 如需开启 Redis，须移除 exclude 中的内容
 // todo 实现c++/c的代码沙箱(第五集作业)
-@SpringBootApplication(exclude = {RedisAutoConfiguration.class})
+//@SpringBootApplication(exclude = {RedisAutoConfiguration.class})
+@SpringBootApplication
 @MapperScan("com.yupi.zlcoj.mapper")
 @EnableScheduling
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)

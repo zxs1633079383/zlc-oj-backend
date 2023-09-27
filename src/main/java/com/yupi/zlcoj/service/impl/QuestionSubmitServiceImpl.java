@@ -27,12 +27,14 @@ import com.yupi.zlcoj.service.QuestionService;
 import com.yupi.zlcoj.service.QuestionSubmitService;
 import com.yupi.zlcoj.mapper.QuestionSubmitMapper;
 import com.yupi.zlcoj.service.UserService;
+import com.yupi.zlcoj.utils.RedisUtils;
 import com.yupi.zlcoj.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,8 +53,6 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Resource
     private QuestionService questionService;
 
-    @Resource
-    private QuestionSubmitMapper questionSubmitMapper;
 
     @Resource
     private UserService userService;
@@ -60,6 +60,9 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Resource
     @Lazy //循环依赖, 按需加载
     private JudgeService judgeService;
+
+    @Resource
+    private RedisUtils redisUtils;
 
     @Override
     public long doQuestionSubmit(QuestionSubmitAddRequest questionSubmitAddRequest, User loginnUser) {
@@ -89,13 +92,25 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         //设置初始状态
         questionSubmit.setStatus(QuestionSubmitStatusEnum.WAITING.getValue());
         questionSubmit.setJudeInfo("{}");
+
+
         boolean save = this.save(questionSubmit);
+        Long questionSubmitId = questionSubmit.getId();
+
 //        boolean save = this.save(questionSubmit);
         if (!save) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目提交失败");
+        } else {
+            //mysql存入成功 存入redis 初始值 (1)  等待中
+            // todo  mysql与redis 数据同步
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("questionSubmitId", questionSubmitId);
+            map.put("judgeInfo", questionSubmit.getJudeInfo());
+            map.put("status", questionSubmit.getStatus());
+            redisUtils.set("submit:" + questionSubmit.getId(), map);
+//            redisUtils.set("submit:" + questionSubmit.getId(), questionSubmit.getStatus());
         }
 
-        Long questionSubmitId = questionSubmit.getId();
         //todo 执行判题服务
         CompletableFuture.runAsync(() -> {
             QuestionSubmit questionSubmit1 = judgeService.duJudge(questionSubmitId);

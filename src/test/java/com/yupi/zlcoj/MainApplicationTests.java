@@ -5,11 +5,14 @@ import com.yupi.zlcoj.config.WxOpenConfig;
 import javax.annotation.Resource;
 
 import com.yupi.zlcoj.model.entity.QuestionSubmit;
+import com.yupi.zlcoj.model.enums.QuestionSubmitStatusEnum;
 import com.yupi.zlcoj.service.QuestionSubmitService;
+import com.yupi.zlcoj.utils.RedisUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * 主类测试
@@ -25,6 +28,9 @@ class MainApplicationTests {
 
     @Resource
     private QuestionSubmitService questionSubmitService;
+
+    @Resource
+    private RedisUtils redisUtils;
 
     @Test
     void contextLoads() {
@@ -51,6 +57,14 @@ class MainApplicationTests {
 
         boolean save = questionSubmitService.save(questionSubmit);
         System.out.println("删除是否成功: " + save);
+    }
+
+    @Test
+    void testRedis() {
+        HashMap<String, Object> map = (HashMap<String, Object>) redisUtils.get("submit:" + 1706561617770061825L);
+        for (String s : map.keySet()) {
+            System.out.println(map.get(s));
+        }
     }
 
 }
